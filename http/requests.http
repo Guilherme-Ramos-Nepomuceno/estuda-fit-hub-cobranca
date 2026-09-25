@@ -1,0 +1,60 @@
+### Saúde
+GET http://localhost:8080/health
+
+### Criar aluno
+POST http://localhost:8080/alunos
+Content-Type: application/json
+
+{
+  "nome": "Maria Exemplo",
+  "email": "maria@exemplo.com",
+  "telefone": "11999998888",
+  "cpf": "12345678901",
+  "unidade_id": 1
+}
+
+### Consultar aluno (troque o id)
+GET http://localhost:8080/alunos/1
+
+### Faturas do aluno
+GET http://localhost:8080/alunos/1/faturas
+
+### Criar matrícula (gera a primeira fatura)
+POST http://localhost:8080/matriculas
+Content-Type: application/json
+
+{
+  "aluno_id": 2001,
+  "plano_id": 2,
+  "dia_vencimento": 10
+}
+
+### Cancelar matrícula
+POST http://localhost:8080/matriculas/2001/cancelar
+
+### Check-in na catraca
+POST http://localhost:8080/checkins
+Content-Type: application/json
+
+{
+  "cpf": "10000000001",
+  "unidade_id": 1
+}
+
+### Webhook do gateway (use um gateway_ref existente)
+POST http://localhost:8080/webhooks/pagamento
+Content-Type: application/json
+
+{
+  "reference": "gw_1_202609",
+  "status": "approved",
+  "amount": 89.90,
+  "method": "pix",
+  "event_id": "evt_123"
+}
+
+### Relatório de inadimplência
+GET http://localhost:8080/relatorios/inadimplencia?unidade_id=1
+
+### Relatório de receita
+GET http://localhost:8080/relatorios/receita?competencia=2026-09

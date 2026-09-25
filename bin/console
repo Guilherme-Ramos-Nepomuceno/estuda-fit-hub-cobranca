@@ -1,0 +1,34 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../bootstrap.php';
+
+use EstudaFitHub\Console\CobrancaRegua;
+use EstudaFitHub\Console\DbMigrate;
+use EstudaFitHub\Console\DbSeed;
+use EstudaFitHub\Console\FaturasGerarMensais;
+use EstudaFitHub\Console\FaturasMarcarVencidas;
+
+$comandos = [
+    'db:migrate' => [DbMigrate::class, 'Recria o schema do zero'],
+    'db:seed' => [DbSeed::class, 'Popula dados fictícios (--alunos=N, padrão 2000)'],
+    'faturas:gerar-mensais' => [FaturasGerarMensais::class, 'Cron do dia 1º: gera faturas da competência ([YYYY-MM])'],
+    'faturas:marcar-vencidas' => [FaturasMarcarVencidas::class, 'Cron diário: abertas vencidas viram "vencida"'],
+    'cobranca:regua' => [CobrancaRegua::class, 'Cron diário: lembretes e bloqueio por inadimplência (--limite=N)'],
+];
+
+$nome = $argv[1] ?? '';
+if (!isset($comandos[$nome])) {
+    fwrite(STDERR, "Uso: php bin/console <comando> [args]\n\nComandos disponíveis:\n");
+    foreach ($comandos as $chave => [, $descricao]) {
+        fwrite(STDERR, sprintf("  %-26s %s\n", $chave, $descricao));
+    }
+    exit(1);
+}
+
+$inicio = microtime(true);
+$codigo = (new $comandos[$nome][0]())->executar(array_slice($argv, 2));
+printf("Concluído em %.1fs\n", microtime(true) - $inicio);
+exit($codigo);

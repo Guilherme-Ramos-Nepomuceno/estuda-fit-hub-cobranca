@@ -1,0 +1,42 @@
+services:
+  app:
+    build: .
+    container_name: estuda-fit-hub-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: estuda_fit_hub
+      DB_USER: estuda_fit_hub
+      DB_PASS: estuda_fit_hub
+      # Latencia simulada das integracoes externas (ms). Aumente para sentir o acoplamento.
+      NOTIFICACAO_LATENCIA_MS: "150"
+      GATEWAY_LATENCIA_MS: "2"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    container_name: estuda-fit-hub-db
+    ports:
+      - "3316:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: estuda_fit_hub
+      MYSQL_USER: estuda_fit_hub
+      MYSQL_PASSWORD: estuda_fit_hub
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  db-data:
