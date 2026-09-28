@@ -87,9 +87,9 @@ Projetar e **iniciar** a extração do domínio de **Cobrança** para um serviç
 ### Formato e prazo
 
 - Esforço esperado: até **6 horas**. Não premiamos quem gastar mais tempo.
-- Prazo de entrega: **5 dias corridos** a partir do recebimento.
+- Prazo de entrega: **2 dias corridos** a partir do recebimento.
 - Entrega: fork ou cópia deste repositório com o código, o documento e o README, em um repositório Git ao qual tenhamos acesso.
-- Apresentação: **45 minutos** em chamada, sendo 15 de apresentação sua e 30 de conversa técnica.
+- Apresentação: **30 minutos** em chamada, sendo 15 de apresentação sua e 15 de conversa técnica.
 
 ### Uso de ferramentas de IA
 
