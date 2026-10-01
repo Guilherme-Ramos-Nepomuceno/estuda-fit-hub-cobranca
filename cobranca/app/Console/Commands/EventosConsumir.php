@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Cobranca\GerarPrimeiraFatura;
+use App\Cobranca\ProcessarPagamento;
 use App\Eventos\Consumidor;
 use App\Eventos\EventSource;
 use Illuminate\Console\Command;
@@ -18,10 +19,11 @@ class EventosConsumir extends Command
 
     protected $description = 'Consome o feed de eventos do monólito';
 
-    public function handle(EventSource $fonte, GerarPrimeiraFatura $gerarPrimeiraFatura): int
+    public function handle(EventSource $fonte, GerarPrimeiraFatura $gerarPrimeiraFatura, ProcessarPagamento $processarPagamento): int
     {
         $consumidor = new Consumidor($fonte, 'monolito', [
             'MatriculaCriada' => $gerarPrimeiraFatura,
+            'WebhookPagamentoRecebido' => $processarPagamento,
         ]);
 
         if ($this->option('uma-vez')) {

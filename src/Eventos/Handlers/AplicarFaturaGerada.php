@@ -10,8 +10,9 @@ use EstudaFitHub\Services\NotificacaoService;
 use EstudaFitHub\Support\DB;
 
 /**
- * FaturaGerada (Cobrança → monólito): grava a cópia de leitura da fatura, com o mesmo id
- * (ADR-006), e envia o e-mail que antes saía dentro da transação da matrícula.
+ * FaturaGerada (Cobrança → monólito): grava a cópia de leitura da fatura, identificada pelo
+ * id de Cobrança em cobranca_id (ADR-006), e envia o e-mail que antes saía dentro da
+ * transação da matrícula.
  */
 final class AplicarFaturaGerada
 {
@@ -19,7 +20,7 @@ final class AplicarFaturaGerada
     {
         $f = $evento->dados;
         DB::execute(
-            "INSERT INTO faturas (id, matricula_id, aluno_id, competencia, valor, vencimento, status, gateway_ref)
+            "INSERT INTO faturas (cobranca_id, matricula_id, aluno_id, competencia, valor, vencimento, status, gateway_ref)
              VALUES (?, ?, ?, ?, ?, ?, 'aberta', ?) AS novo
              ON DUPLICATE KEY UPDATE gateway_ref = novo.gateway_ref",
             [$f['fatura_id'], $f['matricula_id'], $f['aluno_id'], $f['competencia'], $f['valor'], $f['vencimento'], $f['gateway_ref']],

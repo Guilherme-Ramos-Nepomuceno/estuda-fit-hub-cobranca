@@ -1,6 +1,12 @@
 <?php
 
 return [
+    // Fuso do negócio para regras de data (vencimento, bloqueio). O banco e os eventos usam UTC.
+    'fuso' => env('COBRANCA_FUSO', 'America/Sao_Paulo'),
+
+    // Dias de atraso a partir dos quais o aluno fica bloqueado (mesma regra da régua do monólito).
+    'dias_para_bloqueio' => 10,
+
     'eventos' => [
         // Token que o monólito usa para ler o feed de Cobrança.
         'token' => env('EVENTOS_TOKEN'),

@@ -7,6 +7,8 @@ namespace EstudaFitHub\Console;
 use EstudaFitHub\Eventos\Consumidor;
 use EstudaFitHub\Eventos\EventSource;
 use EstudaFitHub\Eventos\Handlers\AplicarFaturaGerada;
+use EstudaFitHub\Eventos\Handlers\AplicarFaturaPaga;
+use EstudaFitHub\Eventos\Handlers\AplicarSituacaoFinanceira;
 use EstudaFitHub\Eventos\HttpFeedSource;
 use Throwable;
 
@@ -27,6 +29,8 @@ final class EventosConsumir implements Comando
             'cobranca',
             [
                 'FaturaGerada' => new AplicarFaturaGerada(),
+                'FaturaPaga' => new AplicarFaturaPaga(),
+                'SituacaoFinanceiraAlterada' => new AplicarSituacaoFinanceira(),
             ],
         );
     }

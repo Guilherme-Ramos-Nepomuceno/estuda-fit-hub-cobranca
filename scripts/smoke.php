@@ -66,7 +66,7 @@ $checkin = chamar('POST', '/checkins', ['cpf' => $cpf, 'unidade_id' => 1]);
 esperar($checkin['dados']['liberado'] === true, 'check-in liberado com fatura em aberto');
 
 $webhook = chamar('POST', '/webhooks/pagamento', [
-    'reference' => $referencia, 'status' => 'approved', 'amount' => 119.90, 'method' => 'pix', 'event_id' => 'evt_smoke_1',
+    'reference' => $referencia, 'status' => 'approved', 'amount' => 119.90, 'method' => 'pix', 'event_id' => "evt_smoke_{$cpf}", // único por execução: o webhook deduplica por event_id
 ]);
 esperar($webhook['status'] === 204, 'webhook de pagamento aceito');
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use EstudaFitHub\Console\EventosConsumir;
 use EstudaFitHub\Controllers\AlunoController;
 use EstudaFitHub\Controllers\EventosController;
+use EstudaFitHub\Controllers\RelatorioController;
 use EstudaFitHub\Eventos\Evento;
 use EstudaFitHub\Eventos\EventSource;
 use EstudaFitHub\Eventos\Outbox;
@@ -95,14 +96,14 @@ final class EventosTest extends TestCase
 
         EventosConsumir::consumidor($fonte)->processarLote();
 
-        $copia = Fatura::find(2000000001);
+        $copia = Fatura::where('cobranca_id', 2000000001)->first();
         $this->assertNotNull($copia);
         $this->assertSame('gw_2000000001_abcdef12', $copia->gateway_ref);
         $this->assertSame('aberta', $copia->status);
         $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->where('template', 'fatura_gerada')->count());
 
         $tela = (new AlunoController())->faturas((new Request('GET', '/alunos/x/faturas'))->comParametros(['id' => (string) $aluno->id]))->dados();
-        $this->assertSame(2000000001, (int) $tela['faturas'][0]['id']);
+        $this->assertSame(2000000001, (int) $tela['faturas'][0]['cobranca_id']);
     }
 
     /** Critério 9: reprocessar o mesmo evento não repete o efeito */
@@ -121,6 +122,42 @@ final class EventosTest extends TestCase
         $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->count());
     }
 
+    /** Etapa 3, critério 3 */
+    public function testFaturaPagaAtualizaCopiaGravaPagamentoEEnviaSms(): void
+    {
+        $aluno = $this->criarAluno();
+        $matricula = $this->criarMatricula($aluno, null, []);
+        $copia = $this->criarFatura($matricula, ['cobranca_id' => 2000000001, 'competencia' => '2026-10-01', 'gateway_ref' => 'gw_2000000001_abcdef12']);
+        $paga = new Evento(1, 'evt-paga', 'FaturaPaga', 1, '2026-10-20 15:00:00.000', 'corr-pg', 'fatura:2000000001', 2, [
+            'fatura_id' => 2000000001, 'aluno_id' => (int) $aluno->id, 'pagamento_id' => 2000000050,
+            'valor' => '99.90', 'metodo' => 'pix', 'pago_em' => '2026-10-20 15:00:00',
+        ]);
+
+        EventosConsumir::consumidor(new FonteEmMemoria([$paga]))->processarLote();
+
+        $fatura = Fatura::where('cobranca_id', 2000000001)->first();
+        $this->assertSame('paga', $fatura->status);
+        $this->assertSame('2026-10-20 12:00:00', $fatura->pago_em, 'UTC convertido para o fuso local');
+        $this->assertSame(1, (int) DB::selectOne('SELECT COUNT(*) AS total FROM pagamentos WHERE cobranca_id = 2000000050 AND fatura_id = ?', [$copia->id])['total']);
+        $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->where('template', 'pagamento_confirmado')->where('canal', 'sms')->count());
+
+        $receita = (new RelatorioController())->receita(new Request('GET', '/relatorios/receita', ['competencia' => '2026-10']))->dados();
+        $this->assertSame(99.90, (float) $receita['receita'][0]['receita']);
+    }
+
+    /** Etapa 3, critério 4 */
+    public function testSituacaoSemBloqueioReativaAlunoBloqueado(): void
+    {
+        $aluno = $this->criarAluno(['situacao' => 'bloqueado']);
+        $evento = new Evento(1, 'evt-sit', 'SituacaoFinanceiraAlterada', 1, '2026-10-20 15:00:00.000', 'corr-pg', "aluno:{$aluno->id}", 1, [
+            'aluno_id' => (int) $aluno->id, 'vencida_desde' => null, 'bloqueado' => false,
+        ]);
+
+        EventosConsumir::consumidor(new FonteEmMemoria([$evento]))->processarLote();
+
+        $this->assertSame('ativo', $aluno->refresh()->situacao);
+    }
+
     /** Critério 10: sequência já aplicada é descartada */
     public function testEventoForaDeOrdemNaoAlteraDados(): void
     {
@@ -132,7 +169,7 @@ final class EventosTest extends TestCase
 
         EventosConsumir::consumidor(new FonteEmMemoria([$novo, $antigo]))->processarLote();
 
-        $this->assertSame('gw_2000000001_abcdef12', Fatura::find(2000000001)->gateway_ref);
+        $this->assertSame('gw_2000000001_abcdef12', Fatura::where('cobranca_id', 2000000001)->first()->gateway_ref);
         $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->count());
         $this->assertSame(2, (int) DB::selectOne("SELECT ultimo_id FROM consumidor_posicao WHERE feed = 'cobranca'")['ultimo_id'], 'A posição avança mesmo descartando');
     }
