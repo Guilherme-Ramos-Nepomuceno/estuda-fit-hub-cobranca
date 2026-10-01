@@ -29,7 +29,7 @@ final class FonteEmMemoria implements EventSource
 }
 
 /**
- * PRD etapa 2: feed do monólito e consumo idempotente de FaturaGerada.
+ * PRD etapa 1: feed do monólito e consumo idempotente de FaturaGerada.
  */
 final class EventosTest extends TestCase
 {
@@ -122,7 +122,7 @@ final class EventosTest extends TestCase
         $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->count());
     }
 
-    /** Etapa 3, critério 3 */
+    /** Etapa 2, critério 3 */
     public function testFaturaPagaAtualizaCopiaGravaPagamentoEEnviaSms(): void
     {
         $aluno = $this->criarAluno();
@@ -145,7 +145,7 @@ final class EventosTest extends TestCase
         $this->assertSame(99.90, (float) $receita['receita'][0]['receita']);
     }
 
-    /** Etapa 3, critério 4 */
+    /** Etapa 2, critério 4 */
     public function testSituacaoSemBloqueioReativaAlunoBloqueado(): void
     {
         $aluno = $this->criarAluno(['situacao' => 'bloqueado']);

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** PRD etapa 2, critérios 7 e 8: feed de eventos de Cobrança. */
+/** PRD etapa 1, critérios 7 e 8: feed de eventos de Cobrança. */
 class FeedEventosTest extends TestCase
 {
     use RefreshDatabase;

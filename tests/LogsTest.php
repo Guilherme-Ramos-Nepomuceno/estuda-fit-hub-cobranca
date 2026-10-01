@@ -27,7 +27,7 @@ final class ControllerQueQuebra
 }
 
 /**
- * PRD etapa 5: logs estruturados com correlation_id e sem vazamento de erro de banco.
+ * PRD etapa 4: logs estruturados com correlation_id e sem vazamento de erro de banco.
  */
 final class LogsTest extends TestCase
 {

@@ -1,4 +1,4 @@
-# Etapa 2: gerar fatura para matrícula, por evento
+# Etapa 1: gerar fatura para matrícula, por evento
 
 **Contexto.** Hoje a primeira fatura nasce dentro da transação da matrícula, com gateway e e-mail síncronos (acoplamento A). Gateway lento deixa a matrícula lenta; gateway fora derruba a matrícula.
 

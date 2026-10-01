@@ -31,7 +31,7 @@ final class CheckinTest extends TestCase
     }
 
     /**
-     * Ajustado (ponto B, PRD etapa 4): a catraca lê a cópia local da situação financeira. A fábrica
+     * Ajustado (ponto B, PRD etapa 3): a catraca lê a cópia local da situação financeira. A fábrica
      * grava a fatura direto no banco, sem passar pelo código legado, então o teste recalcula a cópia
      * como o código legado faz na mesma transação.
      */
@@ -61,7 +61,7 @@ final class CheckinTest extends TestCase
         $this->assertTrue($resposta['liberado'], 'Tolerância de 5 dias deve liberar');
     }
 
-    /** Etapa 4, critério 1: a catraca não lê faturas */
+    /** Etapa 3, critério 1: a catraca não lê faturas */
     public function testDecideSoPelaCopiaLocalSemLerFaturas(): void
     {
         $aluno = $this->criarAluno();
@@ -72,7 +72,7 @@ final class CheckinTest extends TestCase
         $this->assertTrue($this->checkin($aluno->cpf, (int) $aluno->unidade_id)['liberado']);
     }
 
-    /** Etapa 4, critérios 2 e 3: limite da tolerância */
+    /** Etapa 3, critérios 2 e 3: limite da tolerância */
     public function testToleranciaDeCincoDiasPelaCopiaLocal(): void
     {
         $seis = $this->criarAluno();
@@ -84,7 +84,7 @@ final class CheckinTest extends TestCase
         $this->assertTrue($this->checkin($cinco->cpf, (int) $cinco->unidade_id)['liberado']);
     }
 
-    /** Etapa 4, critério 4 */
+    /** Etapa 3, critério 4 */
     public function testSemLinhaNaCopiaLocalLibera(): void
     {
         $aluno = $this->criarAluno();

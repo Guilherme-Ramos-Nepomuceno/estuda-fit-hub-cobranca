@@ -63,7 +63,7 @@ final class PagamentoWebhookTest extends TestCase
 
     /**
      * Antes: testWebhookDuplicadoRegistraPagamentoDuasVezesComportamentoAtual exigia 2 pagamentos.
-     * Ajustado (ADR-002, PRD etapa 3, critério 5): o desafio exige tolerar webhook duplicado,
+     * Ajustado (ADR-002, PRD etapa 2, critério 5): o desafio exige tolerar webhook duplicado,
      * e o outbox deduplica pelo event_id do gateway.
      */
     public function testWebhookDuplicadoRegistraUmPagamento(): void
@@ -81,7 +81,7 @@ final class PagamentoWebhookTest extends TestCase
     }
 
     /**
-     * Antes: testReferenciaDesconhecidaRetorna404. Ajustado (PRD etapa 3, critério 10): o monólito
+     * Antes: testReferenciaDesconhecidaRetorna404. Ajustado (PRD etapa 2, critério 10): o monólito
      * não tem como saber se a referência é de uma fatura de Cobrança que ainda não chegou,
      * então registra e responde 204; Cobrança decide.
      */

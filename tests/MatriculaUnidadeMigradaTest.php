@@ -12,7 +12,7 @@ use EstudaFitHub\Services\UnidadesMigradas;
 use EstudaFitHub\Support\DB;
 
 /**
- * PRD etapa 2: matrícula numa unidade migrada não cria fatura local, publica MatriculaCriada.
+ * PRD etapa 1: matrícula numa unidade migrada não cria fatura local, publica MatriculaCriada.
  */
 final class MatriculaUnidadeMigradaTest extends TestCase
 {

@@ -1,4 +1,4 @@
-# Etapa 5: logs estruturados com correlation_id
+# Etapa 4: logs estruturados com correlation_id
 
 **Contexto.** Hoje o monólito registra só duas linhas de texto por requisição, sem nível, sem identificador e sem contexto. A resposta `500` e o `/health` expõem a mensagem de erro do banco. Com Cobrança separada, uma operação cruza dois processos e não há como ligar as pontas.
 

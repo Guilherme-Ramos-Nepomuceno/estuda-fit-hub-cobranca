@@ -1,5 +1,5 @@
 #!/bin/sh
-# Desempenho da catraca com Cobrança fora do ar (PRD etapa 4, critérios 9 e 10):
+# Desempenho da catraca com Cobrança fora do ar (PRD etapa 3, critérios 9 e 10):
 # 60 s a 40 req/s em POST /checkins, exigindo p95 abaixo de 300 ms e nenhuma falha.
 set -e
 cd "$(dirname "$0")/.."

@@ -1,4 +1,4 @@
-# Etapa 4: check-in sem consultar `faturas` (ponto B)
+# Etapa 3: check-in sem consultar `faturas` (ponto B)
 
 **Contexto.** Hoje a catraca consulta `faturas` para decidir se libera (acoplamento B). Com as faturas indo para Cobrança, o check-in cairia junto com ela. O desafio exige p95 abaixo de 300 ms **com Cobrança fora do ar**, no pico de 40 por segundo.
 

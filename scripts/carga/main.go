@@ -1,4 +1,4 @@
-// Gerador de carga para os testes de desempenho (PRD etapa 4, critério 10).
+// Gerador de carga para os testes de desempenho (PRD etapa 3, critério 10).
 //
 // Modo taxa fixa (-rps): N requisições por segundo, independentemente da latência.
 // Placeholders na URL e no corpo: {id} (inteiro aleatório entre -idmin e -idmax) e

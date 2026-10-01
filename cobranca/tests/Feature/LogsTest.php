@@ -17,7 +17,7 @@ use Monolog\LogRecord;
 use RuntimeException;
 use Tests\TestCase;
 
-/** PRD etapa 5, critérios 1 a 3, 5, 9 e 11: logs estruturados em Cobrança. */
+/** PRD etapa 4, critérios 1 a 3, 5, 9 e 11: logs estruturados em Cobrança. */
 class LogsTest extends TestCase
 {
     use RefreshDatabase;

@@ -10,7 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** PRD etapa 3, critérios 2, 6, 7, 10 e 12: webhook de pagamento consumido por Cobrança. */
+/** PRD etapa 2, critérios 2, 6, 7, 10 e 12: webhook de pagamento consumido por Cobrança. */
 class ProcessarPagamentoTest extends TestCase
 {
     use RefreshDatabase;

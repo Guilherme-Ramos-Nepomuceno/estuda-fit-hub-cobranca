@@ -1,5 +1,5 @@
 #!/bin/sh
-# E2E dos fluxos por evento entre monólito e Cobrança, com os consumidores reais (PRD etapas 2 e 3).
+# E2E dos fluxos por evento entre monólito e Cobrança, com os consumidores reais (PRD etapas 1 e 2).
 # Migra temporariamente a unidade 5 e a devolve ao monólito no final, mesmo se algo falhar.
 set -e
 cd "$(dirname "$0")/.."

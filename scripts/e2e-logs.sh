@@ -1,5 +1,5 @@
 #!/bin/sh
-# E2E dos logs (PRD etapa 5): uma matrícula é rastreável pelos dois serviços com um único
+# E2E dos logs (PRD etapa 4): uma matrícula é rastreável pelos dois serviços com um único
 # correlation_id, o Octane não reaproveita o id de uma requisição na seguinte, e nenhum log
 # tem CPF completo.
 set -e

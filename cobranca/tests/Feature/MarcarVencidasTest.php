@@ -9,7 +9,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-/** PRD etapa 4, critérios 11 e 12: Cobrança marca as faturas vencidas. */
+/** PRD etapa 3, critérios 11 e 12: Cobrança marca as faturas vencidas. */
 class MarcarVencidasTest extends TestCase
 {
     use RefreshDatabase;

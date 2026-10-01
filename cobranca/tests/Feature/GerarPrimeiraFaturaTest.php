@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Tests\TestCase;
 
-/** PRD etapa 2, critérios 2, 3, 9, 10 e 13: MatriculaCriada → fatura → FaturaGerada. */
+/** PRD etapa 1, critérios 2, 3, 9, 10 e 13: MatriculaCriada → fatura → FaturaGerada. */
 class GerarPrimeiraFaturaTest extends TestCase
 {
     use RefreshDatabase;

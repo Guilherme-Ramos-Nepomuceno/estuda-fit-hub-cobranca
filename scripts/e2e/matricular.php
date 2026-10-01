@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * E2E: cria um aluno na unidade informada e matricula. Imprime o id do aluno.
- * Para numa unidade migrada, exige 201 com "primeira_fatura": null (PRD etapa 2, critério 1).
+ * Para numa unidade migrada, exige 201 com "primeira_fatura": null (PRD etapa 1, critério 1).
  * Uso (dentro do container do monólito): php scripts/e2e/matricular.php <unidade_id>
  */
 

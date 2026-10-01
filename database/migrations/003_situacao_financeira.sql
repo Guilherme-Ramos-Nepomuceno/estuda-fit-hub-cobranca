@@ -1,4 +1,4 @@
--- Cópia local da situação financeira do aluno, lida pela catraca (ponto B, PRD etapa 4).
+-- Cópia local da situação financeira do aluno, lida pela catraca (ponto B, PRD etapa 3).
 -- vencida_desde: menor vencimento entre as faturas vencidas; NULL quando não há débito.
 
 CREATE TABLE situacao_financeira (

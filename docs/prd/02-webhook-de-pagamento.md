@@ -1,4 +1,4 @@
-# Etapa 3: webhook de pagamento idempotente
+# Etapa 2: webhook de pagamento idempotente
 
 **Contexto.** Hoje o webhook grava em `faturas`, `pagamentos` e `alunos.situacao` e envia SMS na mesma requisição (acoplamento C). Gateway lento trava os workers do monólito, e o check-in falha junto. O webhook também não é idempotente: repetido, gera 2 pagamentos.
 

@@ -10,7 +10,7 @@ use Tests\TestCase;
 use Throwable;
 
 /**
- * PRD etapa 3, critério 8 (o único teste de concorrência da ADR-002): dois webhooks aprovados,
+ * PRD etapa 2, critério 8 (o único teste de concorrência da ADR-002): dois webhooks aprovados,
  * com event_id diferentes, processados ao mesmo tempo para a mesma fatura geram 1 pagamento.
  *
  * Uma conexão separada trava a fatura; dois processos filhos tentam pagá-la e ficam esperando;

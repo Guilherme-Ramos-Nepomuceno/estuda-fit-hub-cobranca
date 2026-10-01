@@ -15,7 +15,7 @@ use EstudaFitHub\Support\DB;
 require_once __DIR__ . '/EventosTest.php'; // FonteEmMemoria
 
 /**
- * PRD etapa 4: a cópia local da situação financeira, que a catraca lê, fica atualizada.
+ * PRD etapa 3: a cópia local da situação financeira, que a catraca lê, fica atualizada.
  */
 final class SituacaoFinanceiraLocalTest extends TestCase
 {

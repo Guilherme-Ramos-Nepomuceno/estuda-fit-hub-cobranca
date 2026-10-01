@@ -1,4 +1,4 @@
-# Etapa 6: documentação de entrega e evidências
+# Etapa 5: documentação de entrega e evidências
 
 **Contexto.** O desafio pede um documento de decisão de **no máximo 2 páginas**, um plano de migração e corte, e um README com como rodar, as decisões tomadas por falta de tempo e o que faria a seguir. A decisão está espalhada em 6 ADRs, e o benchmark que as sustenta está fora do repositório.
 
