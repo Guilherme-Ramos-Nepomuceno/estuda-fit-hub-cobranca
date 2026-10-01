@@ -6,6 +6,7 @@ require __DIR__ . '/../bootstrap.php';
 
 use EstudaFitHub\Controllers\AlunoController;
 use EstudaFitHub\Controllers\CheckinController;
+use EstudaFitHub\Controllers\EventosController;
 use EstudaFitHub\Controllers\MatriculaController;
 use EstudaFitHub\Controllers\PagamentoWebhookController;
 use EstudaFitHub\Controllers\RelatorioController;
@@ -18,6 +19,7 @@ use EstudaFitHub\Support\HttpException;
 $router = new Router();
 
 $router->add('GET', '/health', [StatusController::class, 'health']);
+$router->add('GET', '/eventos', [EventosController::class, 'listar']);
 
 $router->add('POST', '/alunos', [AlunoController::class, 'criar']);
 $router->add('GET', '/alunos/{id}', [AlunoController::class, 'mostrar']);

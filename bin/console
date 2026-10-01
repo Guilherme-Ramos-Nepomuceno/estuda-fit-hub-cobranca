@@ -9,14 +9,19 @@ use EstudaFitHub\Console\CobrancaRegua;
 use EstudaFitHub\Console\DbMigrate;
 use EstudaFitHub\Console\DbSeed;
 use EstudaFitHub\Console\FaturasGerarMensais;
+use EstudaFitHub\Console\EventosConsumir;
 use EstudaFitHub\Console\FaturasMarcarVencidas;
+use EstudaFitHub\Console\UnidadesMigrar;
 
 $comandos = [
-    'db:migrate' => [DbMigrate::class, 'Recria o schema do zero (--se-vazio: só se o banco estiver vazio)'],
+    'db:migrate' => [DbMigrate::class, 'Recria o banco do zero (--se-vazio: num banco existente só aplica as migrations pendentes)'],
     'db:seed' => [DbSeed::class, 'Popula dados fictícios (--alunos=N, padrão 2000; --se-vazio)'],
     'faturas:gerar-mensais' => [FaturasGerarMensais::class, 'Cron do dia 1º: gera faturas da competência ([YYYY-MM])'],
     'faturas:marcar-vencidas' => [FaturasMarcarVencidas::class, 'Cron diário: abertas vencidas viram "vencida"'],
     'cobranca:regua' => [CobrancaRegua::class, 'Cron diário: lembretes e bloqueio por inadimplência (--limite=N)'],
+    'eventos:consumir' => [EventosConsumir::class, 'Consome o feed de eventos de Cobrança (--uma-vez: um lote e sai)'],
+    'unidades:migrar' => [UnidadesMigrar::class, 'Canary: as faturas novas da unidade passam a ser de Cobrança (<id>)'],
+    'unidades:reverter' => [static fn () => new UnidadesMigrar(reverter: true), 'Canary: devolve a unidade ao monólito (<id>)'],
 ];
 
 $nome = $argv[1] ?? '';
@@ -29,6 +34,8 @@ if (!isset($comandos[$nome])) {
 }
 
 $inicio = microtime(true);
-$codigo = (new $comandos[$nome][0]())->executar(array_slice($argv, 2));
+$fabrica = $comandos[$nome][0];
+$comando = is_string($fabrica) ? new $fabrica() : $fabrica();
+$codigo = $comando->executar(array_slice($argv, 2));
 printf("Concluído em %.1fs\n", microtime(true) - $inicio);
 exit($codigo);

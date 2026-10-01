@@ -19,4 +19,7 @@ etapa "Ponta a ponta"
 docker compose exec -T monolito php bin/console db:seed --se-vazio
 docker compose exec -T monolito php scripts/smoke.php
 
+etapa "Eventos entre monólito e Cobrança (ponta a ponta)"
+sh scripts/e2e-eventos.sh
+
 printf '\nTodas as suítes passaram.\n'

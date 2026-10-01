@@ -15,7 +15,10 @@ final class FalhaDeAssercao extends RuntimeException
 
 abstract class TestCase
 {
-    private const TABELAS = ['notificacoes', 'checkins', 'pagamentos', 'faturas', 'matriculas', 'planos', 'alunos', 'unidades'];
+    private const TABELAS = [
+        'notificacoes', 'checkins', 'pagamentos', 'faturas', 'matriculas', 'planos', 'alunos', 'unidades',
+        'outbox', 'eventos_processados', 'agregados_sequencia', 'consumidor_posicao', 'cobranca_unidades_migradas',
+    ];
 
     private static int $sequencia = 0;
 
@@ -27,7 +30,8 @@ abstract class TestCase
     {
         DB::raw('SET FOREIGN_KEY_CHECKS = 0');
         foreach (self::TABELAS as $tabela) {
-            DB::raw("TRUNCATE TABLE `{$tabela}`");
+            // DELETE em vez de TRUNCATE: com poucas linhas, evita recriar o arquivo da tabela a cada teste.
+            DB::raw("DELETE FROM `{$tabela}`");
         }
         DB::raw('SET FOREIGN_KEY_CHECKS = 1');
     }

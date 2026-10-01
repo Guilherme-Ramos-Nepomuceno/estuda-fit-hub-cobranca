@@ -7,7 +7,7 @@ Plano de implementação a partir das [ADRs](../adr/) e do [DESAFIO.md](../../DE
 | Etapa | Resultado observável | Status |
 |---|---|---|
 | 1 | `docker compose up` sobe os 3 serviços com bancos separados, e `make test` roda as 3 suítes | ✅ concluída |
-| [2](02-gerar-fatura-por-evento.md) | Matrícula numa unidade migrada gera a fatura em Cobrança, por evento, e o monólito recebe a cópia | a fazer |
+| [2](02-gerar-fatura-por-evento.md) | Matrícula numa unidade migrada gera a fatura em Cobrança, por evento, e o monólito recebe a cópia | ✅ concluída |
 | [3](03-webhook-de-pagamento.md) | Pagamento de fatura de unidade migrada baixa a fatura em Cobrança e reativa o aluno, sem duplicar | a fazer |
 | [4](04-checkin-sem-faturas.md) | A catraca decide sem ler `faturas` e responde com Cobrança fora do ar; Cobrança marca as vencidas | a fazer |
 | [5](05-logs-estruturados.md) | Uma operação é rastreável nos dois sistemas por `correlation_id`, e nenhum erro de banco sai na resposta | a fazer |

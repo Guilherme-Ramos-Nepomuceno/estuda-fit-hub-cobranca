@@ -37,6 +37,10 @@ services:
       # Latencia simulada das integracoes externas (ms). Aumente para sentir o acoplamento.
       NOTIFICACAO_LATENCIA_MS: "150"
       GATEWAY_LATENCIA_MS: "2"
+      # Feeds de eventos (ADR-005). Tokens apenas de desenvolvimento.
+      EVENTOS_TOKEN: dev-token-feed-monolito
+      COBRANCA_EVENTOS_URL: http://cobranca:8081/eventos
+      COBRANCA_EVENTOS_TOKEN: dev-token-feed-cobranca
     depends_on:
       db:
         condition: service_healthy
@@ -45,6 +49,33 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  # Lê o feed de eventos de Cobrança e aplica no monólito (cópia de faturas, e-mails).
+  monolito-consumidor:
+    build: .
+    container_name: estuda-fit-hub-monolito-consumidor
+    command: ["php", "bin/console", "eventos:consumir"]
+    # Saudável se o laço do consumidor atualizou o sinal de vida no último minuto.
+    healthcheck:
+      test: ["CMD-SHELL", "find /tmp/consumidor-vivo -mmin -1 | grep -q ."]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    volumes:
+      - .:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: estuda_fit_hub
+      DB_USER: estuda_fit_hub
+      DB_PASS: estuda_fit_hub
+      NOTIFICACAO_LATENCIA_MS: "150"
+      COBRANCA_EVENTOS_URL: http://cobranca:8081/eventos
+      COBRANCA_EVENTOS_TOKEN: dev-token-feed-cobranca
+    depends_on:
+      monolito:
+        condition: service_healthy
+    restart: unless-stopped
 
   cobranca:
     build:
@@ -87,6 +118,11 @@ services:
       QUEUE_CONNECTION: database
       OCTANE_SERVER: frankenphp
       OCTANE_WORKERS: "4"
+      # Feeds de eventos (ADR-005). Tokens apenas de desenvolvimento.
+      EVENTOS_TOKEN: dev-token-feed-cobranca
+      MONOLITO_EVENTOS_URL: http://monolito:8080/eventos
+      MONOLITO_EVENTOS_TOKEN: dev-token-feed-monolito
+      GATEWAY_LATENCIA_MS: "2"
     depends_on:
       db:
         condition: service_healthy
@@ -95,6 +131,46 @@ services:
       interval: 5s
       timeout: 5s
       retries: 30
+
+  # Lê o feed de eventos do monólito e aplica em Cobrança (gera as faturas).
+  cobranca-consumidor:
+    build:
+      context: ./cobranca
+      target: dev
+    container_name: estuda-fit-hub-cobranca-consumidor
+    entrypoint: ["php", "artisan", "eventos:consumir"]
+    # Saudável se o laço do consumidor atualizou o sinal de vida no último minuto.
+    healthcheck:
+      test: ["CMD-SHELL", "find /app/storage/framework/consumidor-vivo -mmin -1 | grep -q ."]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    environment:
+      APP_KEY: base64:mJ1Ow5UqWx8fN1rT2p0nH3yGv6aKcL9sQeZdXbIoPuA=
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: cobranca
+      DB_USERNAME: cobranca
+      DB_PASSWORD: cobranca
+      CACHE_STORE: array
+      MONOLITO_EVENTOS_URL: http://monolito:8080/eventos
+      MONOLITO_EVENTOS_TOKEN: dev-token-feed-monolito
+      GATEWAY_LATENCIA_MS: "2"
+    depends_on:
+      cobranca:
+        condition: service_healthy
+      monolito:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: rebuild
+          path: ./cobranca
+          ignore:
+            - vendor/
+            - tests/
+    restart: unless-stopped
 
 volumes:
   db-data:

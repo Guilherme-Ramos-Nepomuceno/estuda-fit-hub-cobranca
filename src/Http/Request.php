@@ -14,6 +14,7 @@ final class Request
         private readonly array $query = [],
         private readonly array $corpo = [],
         private array $parametros = [],
+        private readonly array $headers = [],
     ) {
     }
 
@@ -35,7 +36,14 @@ final class Request
             $corpo = $_POST;
         }
 
-        return new self($metodo, $caminho, $_GET, $corpo);
+        $headers = [];
+        foreach ($_SERVER as $chave => $valor) {
+            if (str_starts_with((string) $chave, 'HTTP_')) {
+                $headers[strtolower(str_replace('_', '-', substr((string) $chave, 5)))] = (string) $valor;
+            }
+        }
+
+        return new self($metodo, $caminho, $_GET, $corpo, [], $headers);
     }
 
     public function input(string $chave, mixed $padrao = null): mixed
@@ -51,6 +59,11 @@ final class Request
     public function query(string $chave, mixed $padrao = null): mixed
     {
         return $this->query[$chave] ?? $padrao;
+    }
+
+    public function header(string $nome): ?string
+    {
+        return $this->headers[strtolower($nome)] ?? null;
     }
 
     public function param(string $chave): string

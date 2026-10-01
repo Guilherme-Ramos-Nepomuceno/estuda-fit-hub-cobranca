@@ -20,6 +20,15 @@ A subida já cria os bancos e aplica as migrations. O schema do monólito só é
 | `monolito` | `http://localhost:8080` | `estuda_fit_hub` |
 | `cobranca` | `http://localhost:8081` | `cobranca`. O usuário não tem acesso ao banco do monólito |
 | `db` | `localhost:3316` | MySQL 8.4 com os dois bancos e as versões `_test` de cada um |
+| `monolito-consumidor` | — | Lê o feed de eventos de Cobrança e aplica no monólito |
+| `cobranca-consumidor` | — | Lê o feed de eventos do monólito e aplica em Cobrança |
+
+Monólito e Cobrança conversam por eventos, com outbox e feed HTTP (`GET /eventos`, protegido por token), conforme a [ADR-005](docs/adr/005-fronteira-de-cobranca-e-eventos-via-outbox-e-feed.md). As faturas de uma unidade só passam a ser geradas por Cobrança depois que a unidade é migrada (canary, [ADR-004](docs/adr/004-rollout-canary-por-unidade.md)):
+
+```bash
+docker compose exec monolito php bin/console unidades:migrar 5     # faturas novas da unidade 5 passam a ser de Cobrança
+docker compose exec monolito php bin/console unidades:reverter 5   # volta para o monólito, sem deploy
+```
 
 > Se você já tinha subido uma versão anterior deste repositório, recrie o volume do banco uma vez (`docker compose down -v`), para que os bancos e usuários de Cobrança sejam criados.
 
@@ -38,7 +47,8 @@ make test        # ou: sh scripts/test.sh
 Um comando sobe o ambiente, se preciso, e roda em sequência:
 - os testes do monólito;
 - os testes do serviço de Cobrança (PHPUnit, banco `cobranca_test`);
-- o fluxo ponta a ponta.
+- o fluxo ponta a ponta do monólito;
+- os fluxos por evento entre os dois sistemas, com os consumidores reais, inclusive com Cobrança fora do ar (`scripts/e2e-eventos.sh`).
 
 Para na primeira falha. Para rodar só os do monólito: `docker compose exec monolito php tests/run.php [Filtro]`. Eles usam o banco `estuda_fit_hub_test` e recriam o schema a cada execução.
 

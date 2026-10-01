@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace EstudaFitHub\Services;
 
+use EstudaFitHub\Eventos\Outbox;
 use EstudaFitHub\Models\Aluno;
 use EstudaFitHub\Models\Fatura;
 use EstudaFitHub\Models\Matricula;
@@ -23,6 +24,10 @@ final class MatriculaService
         }
         if (Matricula::where('aluno_id', $aluno->id)->where('status', 'ativa')->exists()) {
             throw new HttpException(422, 'Aluno já possui matrícula ativa');
+        }
+
+        if (UnidadesMigradas::contem((int) $aluno->unidade_id)) {
+            return $this->criarComCobrancaExterna($aluno, $plano, $diaVencimento);
         }
 
         return DB::transaction(function () use ($aluno, $plano, $diaVencimento): Matricula {
@@ -55,6 +60,41 @@ final class MatriculaService
 
             // Notificação síncrona dentro da transação.
             (new NotificacaoService())->enviarEmail($aluno, 'fatura_gerada', ['fatura' => $fatura->toArray()]);
+
+            return $matricula;
+        });
+    }
+
+    /**
+     * Unidade migrada (ADR-004/005): a fatura é de Cobrança. A matrícula e o evento MatriculaCriada
+     * nascem na mesma transação, sem chamada ao gateway nem e-mail síncrono (acoplamento A).
+     */
+    private function criarComCobrancaExterna(Aluno $aluno, Plano $plano, int $diaVencimento): Matricula
+    {
+        return DB::transaction(function () use ($aluno, $plano, $diaVencimento): Matricula {
+            $matricula = Matricula::create([
+                'aluno_id' => $aluno->id,
+                'plano_id' => $plano->id,
+                'inicio' => date('Y-m-d'),
+                'fim' => date('Y-m-d', strtotime("+{$plano->duracao_meses} months")),
+                'status' => 'ativa',
+                'dia_vencimento' => $diaVencimento,
+            ]);
+
+            Outbox::registrar('MatriculaCriada', "matricula:{$matricula->id}", [
+                'matricula_id' => (int) $matricula->id,
+                'aluno_id' => (int) $aluno->id,
+                'unidade_id' => (int) $aluno->unidade_id,
+                'plano_id' => (int) $plano->id,
+                'valor_mensal' => (string) $plano->valor_mensal,
+                'dia_vencimento' => $diaVencimento,
+                'inicio' => $matricula->inicio,
+                'fim' => $matricula->fim,
+            ]);
+
+            if ($aluno->situacao !== 'ativo') {
+                $aluno->update(['situacao' => 'ativo']);
+            }
 
             return $matricula;
         });
