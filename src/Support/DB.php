@@ -14,6 +14,12 @@ final class DB
 {
     private static ?PDO $pdo = null;
 
+    /** Fecha a conexão; a próxima chamada reconecta com as variáveis de ambiente atuais. */
+    public static function desconectar(): void
+    {
+        self::$pdo = null;
+    }
+
     public static function pdo(): PDO
     {
         if (self::$pdo === null) {

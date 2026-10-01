@@ -3,7 +3,9 @@
 namespace App\Eventos;
 
 use App\Support\Correlacao;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Idempotent Consumer (ADR-005). Os handlers de Cobrança chamam o gateway, que não pode ficar
@@ -27,24 +29,27 @@ class Consumidor
         $eventos = $this->fonte->buscar($posicao, $max);
 
         foreach ($eventos as $evento) {
-            if ($this->deveAplicar($evento)) {
-                Correlacao::definir($evento->correlationId);
+            Correlacao::definir($evento->correlationId);
+            $motivo = $this->motivoParaIgnorar($evento);
+            if ($motivo === null) {
                 ($this->handlers[$evento->tipo] ?? static fn () => null)($evento);
             }
             $this->concluir($evento);
+            $this->registrar($evento, $motivo);
         }
 
         return count($eventos);
     }
 
-    private function deveAplicar(Evento $evento): bool
+    /** @return 'duplicado'|'fora_de_ordem'|null */
+    private function motivoParaIgnorar(Evento $evento): ?string
     {
         if (DB::table('eventos_processados')->where('event_id', $evento->eventId)->exists()) {
-            return false;
+            return 'duplicado';
         }
         $ultima = DB::table('agregados_sequencia')->where('aggregate_id', $evento->aggregateId)->value('sequencia');
 
-        return $ultima === null || $evento->sequencia > (int) $ultima;
+        return $ultima !== null && $evento->sequencia <= (int) $ultima ? 'fora_de_ordem' : null;
     }
 
     private function concluir(Evento $evento): void
@@ -62,5 +67,17 @@ class Consumidor
                 [$this->feed, $evento->id],
             );
         });
+    }
+
+    private function registrar(Evento $evento, ?string $motivo): void
+    {
+        $contexto = ['event_id' => $evento->eventId, 'tipo' => $evento->tipo, 'feed' => $this->feed];
+        if ($motivo !== null) {
+            Log::info('evento.ignorado', $contexto + ['motivo' => $motivo]);
+
+            return;
+        }
+        $lagMs = (int) round(Carbon::parse($evento->ocorridoEm, 'UTC')->diffInMilliseconds(now(), absolute: false));
+        Log::info('evento.processado', $contexto + ['lag_ms' => $lagMs]);
     }
 }

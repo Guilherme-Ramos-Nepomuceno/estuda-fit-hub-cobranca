@@ -49,7 +49,18 @@ Um comando sobe o ambiente, se preciso, e roda em sequência:
 - os testes do serviço de Cobrança (PHPUnit, banco `cobranca_test`);
 - o fluxo ponta a ponta do monólito;
 - os fluxos por evento entre os dois sistemas, com os consumidores reais, inclusive com Cobrança fora do ar (`scripts/e2e-eventos.sh`);
+- os logs: uma operação seguida pelo mesmo `correlation_id` nos dois serviços, sem vazamento entre requisições no Octane e sem CPF completo (`scripts/e2e-logs.sh`);
 - o desempenho da catraca com Cobrança fora do ar: 60 s a 40 req/s em `POST /checkins`, exigindo p95 abaixo de 300 ms e nenhuma falha (`make perf`).
+
+## Logs
+
+Os dois serviços escrevem uma linha JSON por evento ([ADR-003](docs/adr/003-logs-estruturados-com-correlation-id.md)), com `timestamp` (UTC), `level`, `service`, `correlation_id` e `event`. Mande o header `X-Correlation-Id` (ou leia o que volta na resposta) e siga a operação pelos dois lados:
+
+```bash
+docker compose logs --no-color | grep '"correlation_id":"<id>"'
+```
+
+Erros internos respondem só `{"erro": "Erro interno", "correlation_id": "..."}`. O detalhe fica no log, sem os valores das consultas. CPF, e-mail e telefone saem mascarados.
 
 Para na primeira falha. Para rodar só os do monólito: `docker compose exec monolito php tests/run.php [Filtro]`. Eles usam o banco `estuda_fit_hub_test` e recriam o schema a cada execução.
 

@@ -11,6 +11,7 @@ use EstudaFitHub\Eventos\Handlers\AplicarFaturaPaga;
 use EstudaFitHub\Eventos\Handlers\AplicarFaturaVencida;
 use EstudaFitHub\Eventos\Handlers\AplicarSituacaoFinanceira;
 use EstudaFitHub\Eventos\HttpFeedSource;
+use EstudaFitHub\Support\Log;
 use Throwable;
 
 /**
@@ -52,7 +53,7 @@ final class EventosConsumir implements Comando
             try {
                 $lidos = $consumidor->processarLote();
             } catch (Throwable $e) {
-                fwrite(STDERR, "[consumidor] {$e->getMessage()}\n");
+                Log::error('consumidor.erro', ['feed' => 'cobranca', 'exception' => $e::class, 'mensagem' => $e->getMessage()]);
                 $lidos = 0;
             }
             if ($lidos === 0) {

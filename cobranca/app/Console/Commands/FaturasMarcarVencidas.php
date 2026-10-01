@@ -8,6 +8,7 @@ use App\Models\Fatura;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Cron diário: faturas abertas com vencimento no passado viram vencidas. Publica FaturaVencida
@@ -22,6 +23,7 @@ class FaturasMarcarVencidas extends Command
 
     public function handle(): int
     {
+        $inicio = microtime(true);
         $hoje = Carbon::today(config('cobranca.fuso'))->toDateString();
         $total = 0;
 
@@ -43,6 +45,7 @@ class FaturasMarcarVencidas extends Command
                 });
             });
 
+        Log::info('cron.fim', ['cron' => 'faturas:marcar-vencidas', 'vencidas' => $total, 'duracao_s' => round(microtime(true) - $inicio, 2)]);
         $this->line("{$total} faturas marcadas como vencidas");
 
         return self::SUCCESS;

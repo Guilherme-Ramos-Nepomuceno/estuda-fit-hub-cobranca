@@ -22,6 +22,9 @@ docker compose exec -T monolito php scripts/smoke.php
 etapa "Eventos entre monólito e Cobrança (ponta a ponta)"
 sh scripts/e2e-eventos.sh
 
+etapa "Logs: correlation_id de ponta a ponta, sem vazamento e sem CPF"
+sh scripts/e2e-logs.sh
+
 etapa "Catraca com Cobrança fora do ar: p95 < 300 ms a 40 req/s"
 sh scripts/perf-checkin.sh
 

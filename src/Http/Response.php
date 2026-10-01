@@ -32,6 +32,16 @@ final class Response
         return $this->status;
     }
 
+    public function comHeader(string $nome, string $valor): self
+    {
+        return new self($this->status, $this->corpo, [$nome => $valor] + $this->headers);
+    }
+
+    public function header(string $nome): ?string
+    {
+        return $this->headers[$nome] ?? null;
+    }
+
     public function corpo(): string
     {
         return $this->corpo;

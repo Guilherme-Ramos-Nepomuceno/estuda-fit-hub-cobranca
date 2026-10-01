@@ -29,6 +29,10 @@
         <server name="DB_DATABASE" value="cobranca_test" force="true"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="DB_MASK_BINDINGS" value="true"/>
+        <!-- Os testes leem os logs pelo evento MessageLogged; nada vai para a saída -->
+        <env name="LOG_CHANNEL" value="null" force="true"/>
+        <server name="LOG_CHANNEL" value="null" force="true"/>
         <env name="SESSION_DRIVER" value="array"/>
     </php>
 </phpunit>

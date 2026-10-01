@@ -12,6 +12,7 @@ use EstudaFitHub\Models\Pagamento;
 use EstudaFitHub\Services\NotificacaoService;
 use EstudaFitHub\Services\SituacaoFinanceiraLocal;
 use EstudaFitHub\Support\DB;
+use EstudaFitHub\Support\Log;
 use EstudaFitHub\Support\Uuid;
 
 /**
@@ -31,6 +32,9 @@ final class PagamentoWebhookController
         $referencia = (string) $request->input('reference');
         $status = (string) $request->input('status');
         $gatewayEventId = $request->input('event_id');
+        if ($gatewayEventId === null || $gatewayEventId === '') {
+            Log::warning('webhook.sem_event_id', ['reference' => $referencia, 'status' => $status]);
+        }
 
         $novo = DB::transaction(fn (): bool => Outbox::registrar(
             'WebhookPagamentoRecebido',

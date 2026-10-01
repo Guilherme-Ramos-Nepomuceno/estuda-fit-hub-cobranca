@@ -13,9 +13,11 @@ $unidade = (int) ($argv[1] ?? 0);
 
 function post(string $url, array $corpo): array
 {
+    // CORRELATION_ID opcional: permite seguir a operação nos logs dos dois serviços.
+    $correlacao = getenv('CORRELATION_ID') ? 'X-Correlation-Id: ' . getenv('CORRELATION_ID') . "\r\n" : '';
     $resposta = file_get_contents($url, false, stream_context_create(['http' => [
         'method' => 'POST',
-        'header' => "Content-Type: application/json\r\n",
+        'header' => "Content-Type: application/json\r\n{$correlacao}",
         'content' => json_encode($corpo),
         'ignore_errors' => true,
         'timeout' => 10,

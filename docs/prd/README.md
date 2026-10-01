@@ -10,7 +10,7 @@ Plano de implementação a partir das [ADRs](../adr/) e do [DESAFIO.md](../../DE
 | [2](02-gerar-fatura-por-evento.md) | Matrícula numa unidade migrada gera a fatura em Cobrança, por evento, e o monólito recebe a cópia | ✅ concluída |
 | [3](03-webhook-de-pagamento.md) | Pagamento de fatura de unidade migrada baixa a fatura em Cobrança e reativa o aluno, sem duplicar | ✅ concluída |
 | [4](04-checkin-sem-faturas.md) | A catraca decide sem ler `faturas` e responde com Cobrança fora do ar; Cobrança marca as vencidas | ✅ concluída |
-| [5](05-logs-estruturados.md) | Uma operação é rastreável nos dois sistemas por `correlation_id`, e nenhum erro de banco sai na resposta | a fazer |
+| [5](05-logs-estruturados.md) | Uma operação é rastreável nos dois sistemas por `correlation_id`, e nenhum erro de banco sai na resposta | ✅ concluída |
 | [6](06-documentacao-e-evidencias.md) | Avaliador lê a decisão em 2 páginas, roda tudo e reproduz o benchmark | a fazer |
 
 A base de eventos (outbox, feed e inbox) entra na etapa 2, junto com o primeiro evento que a usa: sozinha, não tem nada que se veja funcionando. A ordem 2 → 3 → 4 é obrigatória, porque cada etapa usa os eventos da anterior. A 5 depende só da 2, e a 6 vem por último.

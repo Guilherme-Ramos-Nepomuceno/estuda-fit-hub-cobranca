@@ -16,6 +16,9 @@ putenv('GATEWAY_LATENCIA_MS=0');
 require __DIR__ . '/../bootstrap.php';
 require __DIR__ . '/TestCase.php';
 
+// Os logs JSON ficam em memória durante os testes, para não poluir a saída.
+EstudaFitHub\Support\Log::capturar();
+
 use EstudaFitHub\Console\DbMigrate;
 
 $filtro = $argv[1] ?? '';

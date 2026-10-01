@@ -7,6 +7,7 @@ use App\Cobranca\ProcessarPagamento;
 use App\Eventos\Consumidor;
 use App\Eventos\EventSource;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
@@ -38,7 +39,7 @@ class EventosConsumir extends Command
             try {
                 $lidos = $consumidor->processarLote();
             } catch (Throwable $e) {
-                $this->error("[consumidor] {$e->getMessage()}");
+                Log::error('consumidor.erro', ['feed' => 'monolito', 'exception' => $e]);
                 $lidos = 0;
             }
             if ($lidos === 0) {

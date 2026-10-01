@@ -118,6 +118,10 @@ services:
       APP_KEY: base64:mJ1Ow5UqWx8fN1rT2p0nH3yGv6aKcL9sQeZdXbIoPuA=
       APP_DEBUG: "false"
       LOG_CHANNEL: stderr
+      # Logs JSON no formato da ADR-003, sem os valores das consultas nos erros de banco.
+      LOG_STDERR_FORMATTER: App\Logging\FormatoJson
+      LOG_LEVEL: info
+      DB_MASK_BINDINGS: "true"
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: "3306"
@@ -159,6 +163,10 @@ services:
     environment:
       APP_KEY: base64:mJ1Ow5UqWx8fN1rT2p0nH3yGv6aKcL9sQeZdXbIoPuA=
       LOG_CHANNEL: stderr
+      # Logs JSON no formato da ADR-003, sem os valores das consultas nos erros de banco.
+      LOG_STDERR_FORMATTER: App\Logging\FormatoJson
+      LOG_LEVEL: info
+      DB_MASK_BINDINGS: "true"
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: "3306"

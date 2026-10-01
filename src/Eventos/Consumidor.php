@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace EstudaFitHub\Eventos;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use EstudaFitHub\Support\Correlacao;
 use EstudaFitHub\Support\DB;
+use EstudaFitHub\Support\Log;
 
 /**
  * Idempotent Consumer (ADR-005). Para cada evento, numa única transação: registra o event_id no
@@ -29,18 +32,22 @@ final class Consumidor
         $eventos = $this->fonte->buscar($posicao, $max);
 
         foreach ($eventos as $evento) {
-            DB::transaction(fn () => $this->aplicar($evento));
+            Correlacao::definir($evento->correlationId);
+            $resultado = DB::transaction(fn (): string => $this->aplicar($evento));
+            $this->registrar($evento, $resultado);
         }
 
         return count($eventos);
     }
 
-    private function aplicar(Evento $evento): void
+    /** @return string 'processado', 'duplicado' ou 'fora_de_ordem' */
+    private function aplicar(Evento $evento): string
     {
-        $novo = DB::execute('INSERT IGNORE INTO eventos_processados (event_id) VALUES (?)', [$evento->eventId]) === 1;
-
-        if ($novo && $this->naOrdem($evento)) {
-            Correlacao::definir($evento->correlationId);
+        $resultado = 'duplicado';
+        if (DB::execute('INSERT IGNORE INTO eventos_processados (event_id) VALUES (?)', [$evento->eventId]) === 1) {
+            $resultado = $this->naOrdem($evento) ? 'processado' : 'fora_de_ordem';
+        }
+        if ($resultado === 'processado') {
             ($this->handlers[$evento->tipo] ?? static fn () => null)($evento);
         }
 
@@ -48,6 +55,8 @@ final class Consumidor
             'INSERT INTO consumidor_posicao (feed, ultimo_id) VALUES (?, ?) AS novo ON DUPLICATE KEY UPDATE ultimo_id = GREATEST(consumidor_posicao.ultimo_id, novo.ultimo_id)',
             [$this->feed, $evento->id],
         );
+
+        return $resultado;
     }
 
     /** Registra a sequência do agregado; false se ela já foi aplicada (evento fora de ordem). */
@@ -63,5 +72,19 @@ final class Consumidor
         );
 
         return true;
+    }
+
+    /** Depois do commit: o log só afirma o que de fato foi gravado. */
+    private function registrar(Evento $evento, string $resultado): void
+    {
+        $contexto = ['event_id' => $evento->eventId, 'tipo' => $evento->tipo, 'feed' => $this->feed];
+        if ($resultado !== 'processado') {
+            Log::info('evento.ignorado', $contexto + ['motivo' => $resultado]);
+
+            return;
+        }
+        $ocorrido = new DateTimeImmutable($evento->ocorridoEm, new DateTimeZone('UTC'));
+        $lagMs = (int) round((microtime(true) - (float) $ocorrido->format('U.u')) * 1000);
+        Log::info('evento.processado', $contexto + ['lag_ms' => $lagMs]);
     }
 }
