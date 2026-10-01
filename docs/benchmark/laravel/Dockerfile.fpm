@@ -1,0 +1,6 @@
+FROM bench-laravel-base
+RUN rm -rf /app
+COPY . /app
+WORKDIR /app
+RUN composer dump-autoload --no-dev --classmap-authoritative -q && chown -R www-data:www-data storage bootstrap/cache
+CMD ["sh", "-c", "php artisan config:cache -q && php artisan route:cache -q && php artisan event:cache -q && chown -R www-data:www-data storage bootstrap/cache && php-fpm -D && exec nginx -g 'daemon off;'"]

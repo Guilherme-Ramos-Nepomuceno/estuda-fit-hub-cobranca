@@ -1,8 +1,26 @@
-### Saúde
-GET http://localhost:8080/health
+### Exemplos para disparar à mão (REST Client do VS Code ou cliente HTTP do PhpStorm).
+### Os testes automatizados cobrem estas rotas: make test.
+
+@monolito = http://localhost:8080
+@cobranca = http://localhost:8081
+# Tokens dos feeds de eventos, apenas de desenvolvimento (docker-compose.yml)
+@tokenFeedMonolito = dev-token-feed-monolito
+@tokenFeedCobranca = dev-token-feed-cobranca
+
+########################################################################
+# Monólito
+########################################################################
+
+### Saúde (responde 503 e "banco": "indisponivel" se o banco cair, sem a mensagem do driver)
+GET {{monolito}}/health
+
+### Correlation id: mande o seu e siga a operação nos logs dos dois serviços
+### docker compose logs --no-color | grep '"correlation_id":"minha-operacao-123"'
+GET {{monolito}}/health
+X-Correlation-Id: minha-operacao-123
 
 ### Criar aluno
-POST http://localhost:8080/alunos
+POST {{monolito}}/alunos
 Content-Type: application/json
 
 {
@@ -14,13 +32,16 @@ Content-Type: application/json
 }
 
 ### Consultar aluno (troque o id)
-GET http://localhost:8080/alunos/1
+GET {{monolito}}/alunos/1
 
-### Faturas do aluno
-GET http://localhost:8080/alunos/1/faturas
+### Faturas do aluno (inclui as cópias das faturas de Cobrança, com cobranca_id)
+GET {{monolito}}/alunos/1/faturas
 
-### Criar matrícula (gera a primeira fatura)
-POST http://localhost:8080/matriculas
+### Criar matrícula
+### Unidade não migrada: gera a primeira fatura no monólito, como antes.
+### Unidade migrada: responde "primeira_fatura": null e "cobranca": {"status": "em_processamento"},
+### e a fatura chega por evento em 1 a 2 segundos (veja o fluxo da unidade migrada abaixo).
+POST {{monolito}}/matriculas
 Content-Type: application/json
 
 {
@@ -30,10 +51,10 @@ Content-Type: application/json
 }
 
 ### Cancelar matrícula
-POST http://localhost:8080/matriculas/2001/cancelar
+POST {{monolito}}/matriculas/2001/cancelar
 
-### Check-in na catraca
-POST http://localhost:8080/checkins
+### Check-in na catraca (decide pela situação financeira local, sem chamar Cobrança)
+POST {{monolito}}/checkins
 Content-Type: application/json
 
 {
@@ -42,7 +63,8 @@ Content-Type: application/json
 }
 
 ### Webhook do gateway (use um gateway_ref existente)
-POST http://localhost:8080/webhooks/pagamento
+### Responde 204 na hora e grava no outbox. Mande de novo com o mesmo event_id: não gera segundo pagamento.
+POST {{monolito}}/webhooks/pagamento
 Content-Type: application/json
 
 {
@@ -54,7 +76,68 @@ Content-Type: application/json
 }
 
 ### Relatório de inadimplência
-GET http://localhost:8080/relatorios/inadimplencia?unidade_id=1
+GET {{monolito}}/relatorios/inadimplencia?unidade_id=1
 
 ### Relatório de receita
-GET http://localhost:8080/relatorios/receita?competencia=2026-09
+GET {{monolito}}/relatorios/receita?competencia=2026-09
+
+### Feed de eventos do monólito (o que Cobrança consome)
+GET {{monolito}}/eventos?apos=0&max=50
+Authorization: Bearer {{tokenFeedMonolito}}
+
+########################################################################
+# Fluxo de uma unidade migrada (canary)
+# Antes: docker compose exec monolito php bin/console unidades:migrar 5
+# Depois: docker compose exec monolito php bin/console unidades:reverter 5
+########################################################################
+
+### 1. Aluno numa unidade migrada (anote o "id" da resposta)
+POST {{monolito}}/alunos
+Content-Type: application/json
+
+{
+  "nome": "Aluna Canary",
+  "email": "canary@exemplo.com",
+  "telefone": "11977776666",
+  "cpf": "55544433322",
+  "unidade_id": 5
+}
+
+### 2. Matrícula: responde sem fatura, e Cobrança gera a fatura pelo evento MatriculaCriada
+POST {{monolito}}/matriculas
+Content-Type: application/json
+
+{
+  "aluno_id": 2002,
+  "plano_id": 2,
+  "dia_vencimento": 10
+}
+
+### 3. Em 1 a 2 s a fatura aparece no monólito, com cobranca_id >= 2000000000 (anote o gateway_ref)
+GET {{monolito}}/alunos/2002/faturas
+
+### 4. Pagamento: o monólito só registra; Cobrança baixa a fatura e avisa o monólito, que marca a cópia como paga
+POST {{monolito}}/webhooks/pagamento
+Content-Type: application/json
+
+{
+  "reference": "gw_2000000000_xxxxxxxx",
+  "status": "approved",
+  "amount": 119.90,
+  "method": "pix",
+  "event_id": "evt_canary_1"
+}
+
+########################################################################
+# Cobrança
+########################################################################
+
+### Saúde
+GET {{cobranca}}/up
+
+### Feed de eventos de Cobrança (o que o monólito consome)
+GET {{cobranca}}/eventos?apos=0&max=50
+Authorization: Bearer {{tokenFeedCobranca}}
+
+### Sem token: 401 {"erro": "Não autorizado"}
+GET {{cobranca}}/eventos

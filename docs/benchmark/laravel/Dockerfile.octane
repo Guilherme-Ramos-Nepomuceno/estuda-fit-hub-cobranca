@@ -1,0 +1,7 @@
+FROM bench-laravel-base
+RUN rm -rf /app
+COPY . /app
+WORKDIR /app
+RUN mv /app/frankenphp /usr/local/bin/frankenphp && chmod +x /usr/local/bin/frankenphp \
+ && composer dump-autoload --no-dev --classmap-authoritative -q && php artisan vendor:publish --tag=octane-config -q
+CMD ["sh", "-c", "php artisan config:cache -q && php artisan route:cache -q && exec php artisan octane:frankenphp --host=0.0.0.0 --port=8080 --workers=32 --max-requests=100000"]

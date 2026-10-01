@@ -1,0 +1,5 @@
+FROM bench-php-fpm
+COPY frankenphp /usr/local/bin/frankenphp
+RUN chmod +x /usr/local/bin/frankenphp
+COPY Caddyfile /etc/caddy/Caddyfile
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

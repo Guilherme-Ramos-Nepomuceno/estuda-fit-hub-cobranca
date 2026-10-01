@@ -1,0 +1,4 @@
+{"processos":1,"lote":5000,"linhas":1005000,"segundos":23.7,"linhas_por_s":42435,"pico_mb_por_processo":18,"pico_mb_coordenador":2,"falhas":0,"pico_container_mb":26,"validacao":"ok"}
+{"processos":2,"lote":5000,"linhas":1005000,"segundos":21.1,"linhas_por_s":47654,"pico_mb_por_processo":18,"pico_mb_coordenador":2,"falhas":0,"pico_container_mb":42,"validacao":"ok"}
+{"processos":4,"lote":5000,"linhas":1005000,"segundos":19.7,"linhas_por_s":51064,"pico_mb_por_processo":18,"pico_mb_coordenador":2,"falhas":0,"pico_container_mb":72,"validacao":"ok"}
+{"processos":8,"lote":5000,"linhas":1005000,"segundos":17.4,"linhas_por_s":57776,"pico_mb_por_processo":20,"pico_mb_coordenador":2,"falhas":0,"pico_container_mb":120,"validacao":"ok"}

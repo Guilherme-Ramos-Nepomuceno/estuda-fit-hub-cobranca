@@ -1,0 +1,17 @@
+{
+	auto_https off
+	admin off
+	frankenphp {
+		num_threads 40
+		worker {
+			file /app/public/worker.php
+			num 32
+		}
+	}
+}
+
+:8080 {
+	root * /app/public
+	rewrite * /worker.php
+	php
+}

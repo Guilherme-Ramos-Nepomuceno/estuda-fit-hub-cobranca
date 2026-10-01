@@ -1,7 +1,13 @@
-.PHONY: up down logs migrate seed test perf smoke faturas vencidas regua shell shell-cobranca
+.PHONY: up down logs migrate seed seed-volume test perf smoke faturas vencidas regua shell shell-cobranca
+
+# No Windows, fora do Git Bash não há sh no PATH: usa o que vem com o Git for Windows.
+SH := sh
+ifeq ($(OS),Windows_NT)
+SH := "$(or $(ProgramW6432),$(ProgramFiles))\Git\bin\sh.exe"
+endif
 
 up:
-	docker compose up -d --build --wait --remove-orphans
+	$(SH) scripts/subir.sh
 
 down:
 	docker compose down
@@ -16,7 +22,7 @@ seed:
 	docker compose exec monolito php bin/console db:seed
 
 test:
-	sh scripts/test.sh
+	$(SH) scripts/test.sh
 
 smoke:
 	docker compose exec monolito php scripts/smoke.php
@@ -37,4 +43,7 @@ shell-cobranca:
 	docker compose exec cobranca sh
 
 perf:
-	sh scripts/perf-checkin.sh
+	$(SH) scripts/perf-checkin.sh
+
+seed-volume:
+	docker compose exec monolito php -d memory_limit=512M bin/console db:seed-volume

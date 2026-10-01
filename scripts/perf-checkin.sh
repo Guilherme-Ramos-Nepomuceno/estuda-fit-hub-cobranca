@@ -10,7 +10,8 @@ docker compose stop cobranca cobranca-consumidor >/dev/null 2>&1
 alunos=$(docker compose exec -T db mysql -uestuda_fit_hub -pestuda_fit_hub -N -e "SELECT COUNT(*) FROM estuda_fit_hub.alunos WHERE cpf LIKE '1000%'" 2>/dev/null)
 echo "Cobrança parada; carga em POST /checkins sobre ${alunos} alunos do seed"
 
-docker compose run --rm --build carga \
+docker compose build -q carga
+docker compose run --rm carga \
     -method POST -url http://monolito:8080/checkins \
     -body '{"cpf":"{cpf}","unidade_id":1}' -idmin 1 -idmax "${alunos}" -cpfbase 10000000000 \
     -rps 40 -d "${DURACAO:-60s}" -max-p95-ms 300

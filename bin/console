@@ -8,6 +8,7 @@ require __DIR__ . '/../bootstrap.php';
 use EstudaFitHub\Console\CobrancaRegua;
 use EstudaFitHub\Console\DbMigrate;
 use EstudaFitHub\Console\DbSeed;
+use EstudaFitHub\Console\DbSeedVolume;
 use EstudaFitHub\Console\FaturasGerarMensais;
 use EstudaFitHub\Console\EventosConsumir;
 use EstudaFitHub\Console\FaturasMarcarVencidas;
@@ -17,6 +18,7 @@ use EstudaFitHub\Console\UnidadesMigrar;
 $comandos = [
     'db:migrate' => [DbMigrate::class, 'Recria o banco do zero (--se-vazio: num banco existente só aplica as migrations pendentes)'],
     'db:seed' => [DbSeed::class, 'Popula dados fictícios (--alunos=N, padrão 2000; --se-vazio)'],
+    'db:seed-volume' => [DbSeedVolume::class, 'Volumetria de produção: 250 mil alunos e ~14 milhões de faturas (--alunos=N, --meses=N)'],
     'faturas:gerar-mensais' => [FaturasGerarMensais::class, 'Cron do dia 1º: gera faturas da competência ([YYYY-MM])'],
     'faturas:marcar-vencidas' => [FaturasMarcarVencidas::class, 'Cron diário: abertas vencidas viram "vencida"'],
     'cobranca:regua' => [CobrancaRegua::class, 'Cron diário: lembretes e bloqueio por inadimplência (--limite=N)'],

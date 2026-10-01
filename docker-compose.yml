@@ -1,6 +1,12 @@
 services:
   db:
-    image: mysql:8.4
+    # Configuração espelhada da produção (ADR-002) copiada na imagem com permissão 644.
+    # Montada direto, no Docker Desktop ela chega gravável por todos e o MySQL a ignora.
+    build:
+      context: ./database/conf
+      dockerfile_inline: |
+        FROM mysql:8.4
+        COPY --chmod=644 espelho-producao.cnf /etc/mysql/conf.d/
     container_name: estuda-fit-hub-db
     ports:
       - "3316:3306"
@@ -13,8 +19,6 @@ services:
       - db-data:/var/lib/mysql
       # Bancos e usuários separados por sistema (só na primeira subida do volume)
       - ./database/init:/docker-entrypoint-initdb.d:ro
-      # Configuração espelhada da produção (ADR-002)
-      - ./database/conf/espelho-producao.cnf:/etc/mysql/conf.d/espelho-producao.cnf:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
       interval: 5s

@@ -1,0 +1,9 @@
+{"cenario":"startup_ms","valor":3203}
+{"cenario":"mem_idle","valor":"63.1MiB "}
+{"cenario":"health","res":{"falhas":0,"max":292.109074,"ok":8754,"p50":84.710347,"p95":183.927313,"p99":200.137801,"rps":875.4}}
+{"cenario":"situacao_c8","res":{"falhas":0,"max":78.085411,"ok":5960,"p50":13.693341,"p95":54.475567000000005,"p99":59.746408,"rps":397.3333333333333}}
+{"cenario":"situacao_c64","res":{"falhas":0,"max":485.425801,"ok":7881,"p50":128.700911,"p95":308.282443,"p99":382.94984999999997,"rps":394.05}}
+{"cenario":"webhook_c64","res":{"falhas":0,"max":637.4351839999999,"ok":5789,"p50":211.923953,"p95":397.79058,"p99":483.822185,"rps":289.45}}
+{"cenario":"mem_carga","valor":"127.8MiB ","cpu":"409.56%"}
+{"cenario":"consistencia","eventos":7745,"pagamentos":2202,"outbox":2202}
+{"cenario":"cron_5000","res":{"geradas":5000,"segundos":12}}

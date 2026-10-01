@@ -1,0 +1,9 @@
+FROM php:8.5-fpm-alpine
+RUN docker-php-ext-install pdo_mysql && apk add --no-cache nginx
+COPY opcache.ini /usr/local/etc/php/conf.d/zz-opcache.ini
+COPY fpm-pool.conf /usr/local/etc/php-fpm.d/zz-pool.conf
+COPY nginx.conf /etc/nginx/nginx.conf
+WORKDIR /app
+COPY app.php gerar.php /app/
+COPY public /app/public
+CMD ["sh", "-c", "php-fpm -D && exec nginx -g 'daemon off;'"]
