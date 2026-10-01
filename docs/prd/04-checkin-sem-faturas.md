@@ -30,10 +30,11 @@
 11. `php artisan faturas:marcar-vencidas` → toda fatura `aberta` com vencimento passado vira `vencida`. Publica 1 `FaturaVencida` por fatura e 1 `SituacaoFinanceiraAlterada` por aluno afetado.
 12. Rodar de novo no mesmo dia → nada muda e nenhum evento é publicado.
 13. O monólito consome `FaturaVencida` → a cópia da fatura fica `vencida`.
+14. `SituacaoFinanceiraAlterada` com `bloqueado: true` e aluno `ativo` → `alunos.situacao = 'bloqueado'` e 1 SMS `bloqueio_inadimplencia`, como a régua fazia. Um segundo evento de bloqueio não reenvia o SMS; aluno `inativo` não muda.
 
 ## Fora do escopo
 
-- Régua de bloqueio e lembretes para as unidades migradas (acoplamento E).
+- Lembretes da régua (e-mail de 1 a 10 dias de atraso) para as unidades migradas (acoplamento E).
 - Agendador rodando no compose: o comando fica no `schedule` do Laravel, às 00:05, e em dev roda manualmente.
 - Modo sombra (`checkin.divergencia`): fica no plano.
 
@@ -43,7 +44,8 @@
 - `FaturasMarcarVencidas`, `PagamentoWebhookController`, `MatriculaService::criar` e `cancelar` recalculam a cópia.
 - Os crons legados e o cancelamento ignoram as cópias de Cobrança (`cobranca_id`), que só mudam por evento.
 - A migration preenche a cópia, e o `db:seed` a recalcula. Sem isso, todos seriam liberados.
-- O monólito sobe com `PHP_CLI_SERVER_WORKERS=4`. Medido a 40 req/s com Cobrança parada: 1 worker deu p95 de 843 ms; 4 workers, 67 ms.
+- O monólito sobe com `PHP_CLI_SERVER_WORKERS=4`: cada worker do `php -S` atende uma requisição por vez, e com 4 uma requisição lenta não segura a catraca.
+- O código do monólito vai na imagem, sem montar a pasta do host. No Docker Desktop, a pasta montada custava ~40 ms por requisição e o p95 oscilava entre 154 e 817 ms. Sem ela, a 40 req/s com Cobrança parada, o p95 fica entre 25 e 30 ms.
 - Dois testes do `CheckinTest` ajustados com justificativa: a fábrica grava a fatura direto no banco, então o teste recalcula a cópia.
 
 ## Decisões difíceis de reverter

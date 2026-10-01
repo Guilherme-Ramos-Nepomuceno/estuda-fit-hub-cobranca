@@ -1,4 +1,4 @@
-.PHONY: up down logs migrate seed test smoke faturas vencidas regua shell shell-cobranca
+.PHONY: up down logs migrate seed test perf smoke faturas vencidas regua shell shell-cobranca
 
 up:
 	docker compose up -d --build --wait --remove-orphans
@@ -35,3 +35,6 @@ shell:
 
 shell-cobranca:
 	docker compose exec cobranca sh
+
+perf:
+	sh scripts/perf-checkin.sh

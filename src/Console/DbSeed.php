@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace EstudaFitHub\Console;
 
 use DateTimeImmutable;
+use EstudaFitHub\Services\SituacaoFinanceiraLocal;
 use EstudaFitHub\Support\DB;
 
 /**
@@ -184,6 +185,9 @@ final class DbSeed implements Comando
         }
         $this->inserirLote('checkins', ['aluno_id', 'unidade_id', 'ocorrido_em', 'liberado', 'motivo_bloqueio'], $checkins);
 
+        // As faturas foram gravadas direto no banco: a cópia que a catraca lê precisa ser recalculada.
+        SituacaoFinanceiraLocal::recalcularTodos();
+
         foreach (self::TABELAS as $tabela) {
             $total = DB::selectOne("SELECT COUNT(*) AS total FROM `{$tabela}`")['total'] ?? 0;
             printf("%-14s %8d\n", $tabela, $total);
@@ -195,7 +199,7 @@ final class DbSeed implements Comando
     private function limpar(): void
     {
         DB::raw('SET FOREIGN_KEY_CHECKS = 0');
-        foreach (self::TABELAS as $tabela) {
+        foreach ([...self::TABELAS, 'situacao_financeira'] as $tabela) {
             DB::raw("TRUNCATE TABLE `{$tabela}`");
         }
         DB::raw('SET FOREIGN_KEY_CHECKS = 1');

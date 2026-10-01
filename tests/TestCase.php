@@ -18,6 +18,7 @@ abstract class TestCase
     private const TABELAS = [
         'notificacoes', 'checkins', 'pagamentos', 'faturas', 'matriculas', 'planos', 'alunos', 'unidades',
         'outbox', 'eventos_processados', 'agregados_sequencia', 'consumidor_posicao', 'cobranca_unidades_migradas',
+        'situacao_financeira',
     ];
 
     private static int $sequencia = 0;

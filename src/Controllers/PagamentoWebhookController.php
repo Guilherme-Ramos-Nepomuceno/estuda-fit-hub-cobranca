@@ -10,6 +10,7 @@ use EstudaFitHub\Http\Response;
 use EstudaFitHub\Models\Fatura;
 use EstudaFitHub\Models\Pagamento;
 use EstudaFitHub\Services\NotificacaoService;
+use EstudaFitHub\Services\SituacaoFinanceiraLocal;
 use EstudaFitHub\Support\DB;
 use EstudaFitHub\Support\Uuid;
 
@@ -88,6 +89,7 @@ final class PagamentoWebhookController
             if ($aluno !== null && $aluno->situacao === 'bloqueado') {
                 $aluno->update(['situacao' => 'ativo']);
             }
+            SituacaoFinanceiraLocal::recalcular((int) $fatura->aluno_id);
 
             return true;
         });

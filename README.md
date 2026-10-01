@@ -48,7 +48,8 @@ Um comando sobe o ambiente, se preciso, e roda em sequência:
 - os testes do monólito;
 - os testes do serviço de Cobrança (PHPUnit, banco `cobranca_test`);
 - o fluxo ponta a ponta do monólito;
-- os fluxos por evento entre os dois sistemas, com os consumidores reais, inclusive com Cobrança fora do ar (`scripts/e2e-eventos.sh`).
+- os fluxos por evento entre os dois sistemas, com os consumidores reais, inclusive com Cobrança fora do ar (`scripts/e2e-eventos.sh`);
+- o desempenho da catraca com Cobrança fora do ar: 60 s a 40 req/s em `POST /checkins`, exigindo p95 abaixo de 300 ms e nenhuma falha (`make perf`).
 
 Para na primeira falha. Para rodar só os do monólito: `docker compose exec monolito php tests/run.php [Filtro]`. Eles usam o banco `estuda_fit_hub_test` e recriam o schema a cada execução.
 

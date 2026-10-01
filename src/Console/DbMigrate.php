@@ -72,6 +72,8 @@ final class DbMigrate implements Comando
         if ($sql === false) {
             throw new \RuntimeException("Não foi possível ler {$arquivo}");
         }
+        // Linhas de comentário saem antes de separar: um ";" dentro de um comentário quebraria o comando.
+        $sql = (string) preg_replace('/^\s*--.*$/m', '', $sql);
         $comandos = array_filter(array_map('trim', explode(';', $sql)));
         foreach ($comandos as $comando) {
             DB::raw($comando);

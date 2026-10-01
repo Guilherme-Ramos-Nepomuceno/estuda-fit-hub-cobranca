@@ -8,7 +8,7 @@ use EstudaFitHub\Http\Request;
 use EstudaFitHub\Http\Response;
 use EstudaFitHub\Models\Aluno;
 use EstudaFitHub\Models\Checkin;
-use EstudaFitHub\Models\Fatura;
+use EstudaFitHub\Services\SituacaoFinanceiraLocal;
 use EstudaFitHub\Support\HttpException;
 
 /**
@@ -26,11 +26,8 @@ final class CheckinController
             throw new HttpException(404, 'Aluno não encontrado');
         }
 
-        // Acoplamento: regra de negócio de Cobrança embutida no Check-in.
-        $inadimplente = Fatura::where('aluno_id', $aluno->id)
-            ->where('status', 'vencida')
-            ->where('vencimento', '<', date('Y-m-d', strtotime('-5 days')))
-            ->exists();
+        // Ponto B: decide pela cópia local da situação financeira, sem ler faturas nem chamar Cobrança.
+        $inadimplente = SituacaoFinanceiraLocal::inadimplente((int) $aluno->id);
 
         $liberado = $aluno->situacao === 'ativo' && !$inadimplente;
 

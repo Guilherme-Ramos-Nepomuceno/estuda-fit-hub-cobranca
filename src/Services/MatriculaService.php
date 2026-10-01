@@ -9,6 +9,7 @@ use EstudaFitHub\Models\Aluno;
 use EstudaFitHub\Models\Fatura;
 use EstudaFitHub\Models\Matricula;
 use EstudaFitHub\Models\Plano;
+use EstudaFitHub\Services\SituacaoFinanceiraLocal;
 use EstudaFitHub\Support\DB;
 use EstudaFitHub\Support\HttpException;
 
@@ -57,6 +58,7 @@ final class MatriculaService
             if ($aluno->situacao !== 'ativo') {
                 $aluno->update(['situacao' => 'ativo']);
             }
+            SituacaoFinanceiraLocal::recalcular((int) $aluno->id);
 
             // Notificação síncrona dentro da transação.
             (new NotificacaoService())->enviarEmail($aluno, 'fatura_gerada', ['fatura' => $fatura->toArray()]);
@@ -109,10 +111,13 @@ final class MatriculaService
         DB::transaction(function () use ($matricula): void {
             $matricula->update(['status' => 'cancelada', 'fim' => date('Y-m-d')]);
 
-            // Cobrança acoplada: cancelamento mexe direto nas faturas.
+            // Cobrança acoplada: cancelamento mexe direto nas faturas criadas pelo monólito.
+            // As cópias de Cobrança só mudam por evento (MatriculaCancelada fica no plano).
             Fatura::where('matricula_id', $matricula->id)
                 ->whereIn('status', ['aberta', 'vencida'])
+                ->whereNull('cobranca_id')
                 ->update(['status' => 'cancelada']);
+            SituacaoFinanceiraLocal::recalcular((int) $matricula->aluno_id);
 
             $aluno = $matricula->aluno();
             if ($aluno !== null) {

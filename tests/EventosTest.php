@@ -158,6 +158,34 @@ final class EventosTest extends TestCase
         $this->assertSame('ativo', $aluno->refresh()->situacao);
     }
 
+    /** Etapa 3, critério 14 */
+    public function testSituacaoComBloqueioBloqueiaAlunoEEnviaSmsUmaVez(): void
+    {
+        $aluno = $this->criarAluno();
+        $situacao = fn (int $id, int $sequencia): Evento => new Evento($id, "evt-bloq-{$sequencia}", 'SituacaoFinanceiraAlterada', 1, '2026-10-20 15:00:00.000', 'corr-bloq', "aluno:{$aluno->id}", $sequencia, [
+            'aluno_id' => (int) $aluno->id, 'vencida_desde' => '2026-10-05', 'bloqueado' => true,
+        ]);
+
+        EventosConsumir::consumidor(new FonteEmMemoria([$situacao(1, 1), $situacao(2, 2)]))->processarLote();
+
+        $this->assertSame('bloqueado', $aluno->refresh()->situacao);
+        $this->assertSame(1, Notificacao::where('aluno_id', $aluno->id)->where('template', 'bloqueio_inadimplencia')->where('canal', 'sms')->count());
+    }
+
+    /** Etapa 3, critério 14: a situação cadastral é do monólito */
+    public function testSituacaoComBloqueioNaoMexeEmAlunoInativo(): void
+    {
+        $aluno = $this->criarAluno(['situacao' => 'inativo']);
+        $evento = new Evento(1, 'evt-inativo', 'SituacaoFinanceiraAlterada', 1, '2026-10-20 15:00:00.000', 'corr-inativo', "aluno:{$aluno->id}", 1, [
+            'aluno_id' => (int) $aluno->id, 'vencida_desde' => '2026-10-05', 'bloqueado' => true,
+        ]);
+
+        EventosConsumir::consumidor(new FonteEmMemoria([$evento]))->processarLote();
+
+        $this->assertSame('inativo', $aluno->refresh()->situacao);
+        $this->assertSame(0, Notificacao::where('aluno_id', $aluno->id)->count());
+    }
+
     /** Critério 10: sequência já aplicada é descartada */
     public function testEventoForaDeOrdemNaoAlteraDados(): void
     {

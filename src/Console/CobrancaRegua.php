@@ -27,7 +27,7 @@ final class CobrancaRegua implements Comando
 
         $sql = "SELECT f.id, f.aluno_id, f.valor, f.vencimento, DATEDIFF(CURDATE(), f.vencimento) AS dias_atraso
                   FROM faturas f
-                 WHERE f.status = 'vencida'
+                 WHERE f.status = 'vencida' AND f.cobranca_id IS NULL
                  ORDER BY f.vencimento ASC";
         if ($limite > 0) {
             $sql .= ' LIMIT ' . $limite;
