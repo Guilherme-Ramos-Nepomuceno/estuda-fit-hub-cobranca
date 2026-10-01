@@ -1,34 +1,37 @@
-.PHONY: up down logs migrate seed test smoke faturas vencidas regua shell
+.PHONY: up down logs migrate seed test smoke faturas vencidas regua shell shell-cobranca
 
 up:
-	docker compose up -d --build
+	docker compose up -d --build --wait --remove-orphans
 
 down:
 	docker compose down
 
 logs:
-	docker compose logs -f app
+	docker compose logs -f monolito cobranca
 
 migrate:
-	docker compose exec app php bin/console db:migrate
+	docker compose exec monolito php bin/console db:migrate
 
 seed:
-	docker compose exec app php bin/console db:seed
+	docker compose exec monolito php bin/console db:seed
 
 test:
-	docker compose exec app php tests/run.php
+	sh scripts/test.sh
 
 smoke:
-	docker compose exec app php scripts/smoke.php
+	docker compose exec monolito php scripts/smoke.php
 
 faturas:
-	docker compose exec app php bin/console faturas:gerar-mensais
+	docker compose exec monolito php bin/console faturas:gerar-mensais
 
 vencidas:
-	docker compose exec app php bin/console faturas:marcar-vencidas
+	docker compose exec monolito php bin/console faturas:marcar-vencidas
 
 regua:
-	docker compose exec app php bin/console cobranca:regua --limite=50
+	docker compose exec monolito php bin/console cobranca:regua --limite=50
 
 shell:
-	docker compose exec app sh
+	docker compose exec monolito sh
+
+shell-cobranca:
+	docker compose exec cobranca sh

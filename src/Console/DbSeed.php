@@ -9,7 +9,8 @@ use EstudaFitHub\Support\DB;
 
 /**
  * Popula o banco com dados fictícios determinísticos (semente fixa).
- * Uso: php bin/console db:seed [--alunos=2000]
+ * Uso: php bin/console db:seed [--alunos=2000] [--se-vazio]
+ * Com --se-vazio não faz nada se já houver unidades cadastradas (preserva os dados de quem está testando).
  */
 final class DbSeed implements Comando
 {
@@ -32,6 +33,12 @@ final class DbSeed implements Comando
             if (preg_match('/^--alunos=(\d+)$/', $arg, $m)) {
                 $quantidadeAlunos = max(1, (int) $m[1]);
             }
+        }
+
+        if (in_array('--se-vazio', $args, true) && (int) (DB::selectOne('SELECT COUNT(*) AS total FROM unidades')['total'] ?? 0) > 0) {
+            echo "Banco já populado, seed ignorado\n";
+
+            return 0;
         }
 
         mt_srand(42);

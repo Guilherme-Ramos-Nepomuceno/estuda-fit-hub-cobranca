@@ -1,7 +1,29 @@
 services:
-  app:
+  db:
+    image: mysql:8.4
+    container_name: estuda-fit-hub-db
+    ports:
+      - "3316:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: estuda_fit_hub
+      MYSQL_USER: estuda_fit_hub
+      MYSQL_PASSWORD: estuda_fit_hub
+    volumes:
+      - db-data:/var/lib/mysql
+      # Bancos e usuários separados por sistema (só na primeira subida do volume)
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      # Configuração espelhada da produção (ADR-002)
+      - ./database/conf/espelho-producao.cnf:/etc/mysql/conf.d/espelho-producao.cnf:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  monolito:
     build: .
-    container_name: estuda-fit-hub-app
+    container_name: estuda-fit-hub-monolito
     ports:
       - "8080:8080"
     volumes:
@@ -18,25 +40,61 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-  db:
-    image: mysql:8.4
-    container_name: estuda-fit-hub-db
-    ports:
-      - "3316:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: estuda_fit_hub
-      MYSQL_USER: estuda_fit_hub
-      MYSQL_PASSWORD: estuda_fit_hub
-    volumes:
-      - db-data:/var/lib/mysql
-      - ./database/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 30
+
+  cobranca:
+    build:
+      context: ./cobranca
+      target: dev
+    container_name: estuda-fit-hub-cobranca
+    ports:
+      - "8081:8081"
+    # Em desenvolvimento use `docker compose up --watch`: sincroniza o código,
+    # reinicia o Octane e reconstrói a imagem quando as dependências mudam.
+    develop:
+      watch:
+        - action: rebuild
+          path: ./cobranca/composer.lock
+        - action: sync
+          path: ./cobranca/tests
+          target: /app/tests
+        - action: sync+restart
+          path: ./cobranca
+          target: /app
+          ignore:
+            - vendor/
+            - tests/
+            - storage/
+    environment:
+      APP_NAME: cobranca
+      APP_ENV: local
+      # Chave apenas de desenvolvimento
+      APP_KEY: base64:mJ1Ow5UqWx8fN1rT2p0nH3yGv6aKcL9sQeZdXbIoPuA=
+      APP_DEBUG: "false"
+      LOG_CHANNEL: stderr
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: cobranca
+      DB_USERNAME: cobranca
+      DB_PASSWORD: cobranca
+      CACHE_STORE: array
+      SESSION_DRIVER: array
+      QUEUE_CONNECTION: database
+      OCTANE_SERVER: frankenphp
+      OCTANE_WORKERS: "4"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8081/up"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
 volumes:
   db-data:

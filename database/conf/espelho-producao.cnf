@@ -1,0 +1,8 @@
+# Configuração do MySQL espelhada da produção (ADR-002).
+# Qualquer mudança aqui deve ser aplicada também no provisionamento de produção.
+[mysqld]
+character-set-server = utf8mb4
+collation-server     = utf8mb4_0900_ai_ci
+default-time-zone    = '+00:00'
+sql_mode             = ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+innodb_buffer_pool_size = 512M

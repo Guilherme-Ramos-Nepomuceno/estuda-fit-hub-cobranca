@@ -1,0 +1,2 @@
+# Scripts de shell sempre com LF, para rodarem nos containers mesmo vindos do Windows.
+*.sh text eol=lf

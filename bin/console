@@ -12,8 +12,8 @@ use EstudaFitHub\Console\FaturasGerarMensais;
 use EstudaFitHub\Console\FaturasMarcarVencidas;
 
 $comandos = [
-    'db:migrate' => [DbMigrate::class, 'Recria o schema do zero'],
-    'db:seed' => [DbSeed::class, 'Popula dados fictícios (--alunos=N, padrão 2000)'],
+    'db:migrate' => [DbMigrate::class, 'Recria o schema do zero (--se-vazio: só se o banco estiver vazio)'],
+    'db:seed' => [DbSeed::class, 'Popula dados fictícios (--alunos=N, padrão 2000; --se-vazio)'],
     'faturas:gerar-mensais' => [FaturasGerarMensais::class, 'Cron do dia 1º: gera faturas da competência ([YYYY-MM])'],
     'faturas:marcar-vencidas' => [FaturasMarcarVencidas::class, 'Cron diário: abertas vencidas viram "vencida"'],
     'cobranca:regua' => [CobrancaRegua::class, 'Cron diário: lembretes e bloqueio por inadimplência (--limite=N)'],

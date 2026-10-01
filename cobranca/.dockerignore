@@ -1,0 +1,7 @@
+vendor
+.env
+storage/logs/*
+storage/framework/cache/*
+storage/framework/views/*
+bootstrap/cache/*.php
+tests/coverage
